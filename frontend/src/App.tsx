@@ -77,7 +77,8 @@ function formatDate(dateStr: string): string {
   }
 }
 
-const API_BASE_URL = 'http://localhost:5000/api/research'
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const API_BASE_URL = `${BACKEND_URL}/api/research`
 
 export default function App() {
   const [history, setHistory] = useState<ChatSession[]>(loadHistoryFromStorage)
@@ -200,7 +201,7 @@ export default function App() {
           err.message.toLowerCase().includes('load failed'))
       ) {
         setError(
-          'Unable to connect to the backend server. Please verify that the backend is running on http://localhost:5000.'
+          `Unable to connect to the backend server. Please verify that the backend is running on ${BACKEND_URL}.`
         )
       } else if (err instanceof Error) {
         setError(err.message)
