@@ -421,7 +421,27 @@ export function cleanPubMedReferences(text: string): string {
 export function validateAndCleanSummary(answer: string, question: string = ""): string {
   if (!answer) return "";
 
-  const cleaned = cleanPubMedReferences(answer);
+  // Helper to strip markdown symbols while preserving plain text structure
+  const stripMarkdown = (text: string): string => {
+    let s = text;
+    // Remove escaped markdown asterisks (e.g., \*\*)
+    s = s.replace(/\\\*\\\*/g, "");
+    // Remove escaped single asterisks (e.g., \*)
+    s = s.replace(/\\\*/g, "");
+    // Remove backticks
+    s = s.replace(/`+/g, "");
+    // Remove heading markers (#, ##, ###, etc.) at line start
+    s = s.replace(/^#{1,6}\s*/gm, "");
+    // Remove bold ** and italic * markers
+    s = s.replace(/\*\*(.+?)\*\*/g, "$1");
+    s = s.replace(/\*(.+?)\*/g, "$1");
+    // Convert markdown list markers to hyphens
+    s = s.replace(/^\s*[-*]\s+/gm, "- ");
+    return s;
+  };
+
+  // First clean PubMed references, then strip markdown formatting
+  const cleaned = stripMarkdown(cleanPubMedReferences(answer));
 
   // Validate that no mention of "pubmed" remains in any capitalization
   if (/pubmed/i.test(cleaned)) {
